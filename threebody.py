@@ -8,11 +8,9 @@ from pygame import Surface, Vector2, gfxdraw
 from pygame.color import Color
 
 SCREEN_SIZE: tuple[int, int] = (1280, 720)
-MIN_DISTANCE: float = 50  # To Avoid crazy accelerations when bodies are too close
-MIN_DISTANCE_SQUARED: float = MIN_DISTANCE**2
 GRAVITATIONAL_COEFFICIENT: float = 900
 DEFAULT_NUMBER_OF_STARS: int = 3
-BACKGROUND_COLOR = "black"
+BACKGROUND_COLOR = Color(0, 0, 0)
 
 
 def random_color() -> Color:
@@ -58,12 +56,21 @@ class State:
     colors: tuple[Color, ...]
     gravitation_factor: GravitationFactor
     accelerations: tuple[Vector2, ...]
+    min_distance_squared: float
 
     def __init__(self, number_of_stars: int):
         self.number_of_stars = number_of_stars
+
+        # We sort the masses by descending order
+        # so that the biggest stars are drawn first
+        # and do not hide the smaller ones
         self.masses = tuple(
-            random_mass(number_of_stars) for _ in range(number_of_stars)
+            sorted(
+                (random_mass(number_of_stars) for _ in range(number_of_stars)),
+                reverse=True,
+            )
         )
+
         self.sizes = tuple(size_from_mass(mass) for mass in self.masses)
         self.positions = tuple(random_position() for _ in range(number_of_stars))
         self.velocities = tuple(Vector2(0, 0) for _ in range(number_of_stars))
@@ -72,6 +79,9 @@ class State:
             [0 for _ in range(number_of_stars)] for _ in range(number_of_stars)
         )
         self.accelerations = tuple(Vector2(0, 0) for _ in range(number_of_stars))
+        min_distance = max(10, max(self.sizes))
+        self.min_distance_squared = min_distance**2
+
         self._update_gravitation_factor()
         self._update_acceleration()
 
@@ -82,7 +92,7 @@ class State:
                     self.positions[j]
                 )
                 self.gravitation_factor[i][j] = GRAVITATIONAL_COEFFICIENT / max(
-                    distance_squared, MIN_DISTANCE_SQUARED
+                    distance_squared, self.min_distance_squared
                 )
 
     def _update_acceleration(self):

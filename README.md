@@ -6,9 +6,9 @@ Re-reading Liu Cixin's Three-Body Problem, wanted to make this to visualize the 
 
 ## How to
 
-Install [pygame](https://pypi.org/project/pygame/), then run `threebody.py` with python3 (it works with 3.11).
+Install [pygame](https://pypi.org/project/pygame/), then run `threebody.py` with python 3.11 or higher.
 
-You change the number of stars as command line arguments, for example:
+You can change the number of stars as command line arguments, for example:
 
 ```bash
 ./threebody.py 17
