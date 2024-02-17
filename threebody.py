@@ -149,6 +149,7 @@ def run_simulation(number_of_stars: int):
     clock = pygame.time.Clock()
     running = True
     dt_in_s = 0
+    paused = False
 
     state = State(number_of_stars)
 
@@ -162,12 +163,23 @@ def run_simulation(number_of_stars: int):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                # the "R" key resets the simulation
+                if event.key == pygame.K_r:
+                    state = State(number_of_stars)
+                # the "P" key pauses the simulation
+                if event.key == pygame.K_p:
+                    paused = not paused
+                # the "Q" key quits the simulation
+                if event.key == pygame.K_q:
+                    running = False
 
-        state.update(dt_in_s)
+        if not paused:
+            state.update(dt_in_s)
 
-        screen.fill(BACKGROUND_COLOR)
-        draw_bodies(state, screen)
-        pygame.display.flip()
+            screen.fill(BACKGROUND_COLOR)
+            draw_bodies(state, screen)
+            pygame.display.flip()
 
         dt_in_s = clock.tick(60) / 1000  # limits FPS to 60
 

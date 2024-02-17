@@ -4,7 +4,7 @@ A simple simulation of the three-body problem in python.
 
 Re-reading Liu Cixin's Three-Body Problem, wanted to make this to visualize the three-body problem.
 
-## How to run
+## How to
 
 Install [pygame](https://pypi.org/project/pygame/), then run `threebody.py` with python3 (it works with 3.11).
 
@@ -15,3 +15,7 @@ You change the number of stars as command line arguments, for example:
 ```
 
 To run with 17 stars.
+
+-   pressing `r` will reset the simulation.
+-   pressing `p` will pause/unpause the simulation.
+-   pressing `q` will quit the simulation.
