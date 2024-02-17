@@ -175,11 +175,9 @@ def run_simulation(number_of_stars: int):
 
 
 if __name__ == "__main__":
-    # use arparse to get the number of stars from the command line
     parser = argparse.ArgumentParser(
         prog="threebody", description="Simulate the movement of stars in a 2D space"
     )
-    # add an optional argument but without -n or something
     parser.add_argument(
         "number_of_stars",
         nargs="?",
