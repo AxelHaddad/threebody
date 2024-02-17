@@ -1,47 +1,65 @@
 #! /usr/bin/env python3
+from math import ceil
+from random import randint
+
 import pygame
+from pygame import Vector2, color, gfxdraw
+from pygame.color import Color
 
 SCREEN_SIZE: tuple[int, int] = (1280, 720)
 MIN_DISTANCE: float = 50  # To Avoid crazy accelerations when bodies are too close
-G: float = 1000
-SIZES: list[int] = [40, 20, 10]
-MASSES: list[float] = [2000, 1000, 3500]
+G: float = 900
+NUMBER_OF_STARS: int = 3
 BACKGROUND_COLOR = "black"
-INITIAL_POSITIONS: list[pygame.Vector2] = [
-    pygame.Vector2(300, 300),
-    pygame.Vector2(500, 300),
-    pygame.Vector2(400, 500),
-]
-INITIAL_VELOCITIES: list[pygame.Vector2] = [
-    pygame.Vector2(0, 0),
-    pygame.Vector2(0, 0),
-    pygame.Vector2(0, 0),
-]
-COLORS: list[str] = ["red", "green", "blue"]
-STAR_COUNT = len(SIZES)
 
-assert (
-    STAR_COUNT
-    == len(MASSES)
-    == len(INITIAL_POSITIONS)
-    == len(INITIAL_VELOCITIES)
-    == len(COLORS)
-), "All lists must be the same length"
+
+def random_color() -> Color:
+    return Color(randint(0, 255), randint(0, 255), randint(0, 255))
+
+
+def random_position() -> Vector2:
+    x_margin = ceil(SCREEN_SIZE[0] / 10)
+    x = randint(x_margin, SCREEN_SIZE[0] - x_margin)
+    y_margin = ceil(SCREEN_SIZE[1] / 10)
+    y = randint(y_margin, SCREEN_SIZE[1] - y_margin)
+    return Vector2(x, y)
+
+
+def random_mass() -> float:
+    mass = randint(1000, 4000)
+    normalized_mass = mass * 4 / NUMBER_OF_STARS
+    return normalized_mass
+
+
+def size_from_mass(mass: float) -> float:
+    """Just linear here, for more representation"""
+    return max(mass / 50, 3)
+
+
+MASSES: list[float] = [random_mass() for _ in range(NUMBER_OF_STARS)]
+SIZES: list[float] = [size_from_mass(mass) for mass in MASSES]
+
+
+INITIAL_POSITIONS: list[Vector2] = [random_position() for _ in range(NUMBER_OF_STARS)]
+INITIAL_VELOCITIES: list[Vector2] = [Vector2(0, 0) for _ in range(NUMBER_OF_STARS)]
+COLORS: list[color.Color] = [random_color() for _ in range(NUMBER_OF_STARS)]
 
 
 def compute_accelerations(
-    positions: list[pygame.Vector2], masses: list[float]
-) -> list[pygame.Vector2]:
-    accelerations = [pygame.Vector2(0, 0) for _ in range(STAR_COUNT)]
-    for i in range(STAR_COUNT):
+    positions: list[Vector2], masses: list[float]
+) -> list[Vector2]:
+    accelerations = [Vector2(0, 0) for _ in range(NUMBER_OF_STARS)]
+    for i in range(NUMBER_OF_STARS):
         # we will compute the acceleration vector for each body
         # and add it to the accelerations list
-        for j in range(STAR_COUNT):
+        for j in range(NUMBER_OF_STARS):
             if i == j:
                 continue
             # first we compute the unit direction vector from i to j
             vector_between_the_two = positions[j] - positions[i]
             distance = vector_between_the_two.length()
+            if distance <= 1:
+                continue
             unit_direction = vector_between_the_two.normalize()
             # then we compute the acceleration of i from the  gravity of and j
             accelerations[i] += (
@@ -51,8 +69,8 @@ def compute_accelerations(
 
 
 def compute_velocities(
-    velocities: list[pygame.Vector2], accelerations: list[pygame.Vector2], dt: float
-) -> list[pygame.Vector2]:
+    velocities: list[Vector2], accelerations: list[Vector2], dt: float
+) -> list[Vector2]:
     return [
         velocity + acceleration * dt
         for (velocity, acceleration) in zip(velocities, accelerations)
@@ -60,17 +78,26 @@ def compute_velocities(
 
 
 def compute_positions(
-    positions: list[pygame.Vector2], velocities: list[pygame.Vector2], dt_in_s: float
-) -> list[pygame.Vector2]:
+    positions: list[Vector2], velocities: list[Vector2], dt_in_s: float
+) -> list[Vector2]:
     return [
         position + velocity * dt_in_s
         for (position, velocity) in zip(positions, velocities)
     ]
 
 
-def draw_bodies(positions: list[pygame.Vector2]):
+def draw_circle(surface, color, position: Vector2, radius):
+    x, y = round(position.x), round(position.y)
+    int_radius = round(radius)
+    if int_radius > 5:
+        # no need to use anti-aliasing for small circles
+        gfxdraw.aacircle(surface, x, y, int_radius, color)
+    gfxdraw.filled_circle(surface, x, y, int_radius, color)
+
+
+def draw_bodies(positions: list[Vector2]):
     for color, position, size in zip(COLORS, positions, SIZES):
-        pygame.draw.circle(screen, color, position, size)
+        draw_circle(screen, color, position, size)
 
 
 if __name__ == "__main__":
@@ -82,10 +109,8 @@ if __name__ == "__main__":
     running = True
     dt_in_s = 0
 
-    positions: list[pygame.Vector2] = INITIAL_POSITIONS
-    velocities: list[pygame.Vector2] = INITIAL_VELOCITIES
-
-    BACKGROUND_COLOR = "black"
+    positions: list[Vector2] = INITIAL_POSITIONS
+    velocities: list[Vector2] = INITIAL_VELOCITIES
 
     while running:
         # poll for events
