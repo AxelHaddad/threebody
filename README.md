@@ -20,3 +20,4 @@ To run with 17 stars.
 -   pressing `p` will pause/unpause the simulation.
 -   pressing `q` will quit the simulation.
 -   pressing `z/a` will zoom in/out.
+-   pressing `←/→/↑/↓` will move the view.

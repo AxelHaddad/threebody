@@ -8,6 +8,7 @@ from pygame import Surface, Vector2, gfxdraw
 from pygame.color import Color
 
 SCREEN_SIZE: tuple[int, int] = (1280, 720)
+SHIFT = max(SCREEN_SIZE[0], SCREEN_SIZE[1]) / 20
 GRAVITATIONAL_COEFFICIENT: float = 900
 DEFAULT_NUMBER_OF_STARS: int = 3
 BACKGROUND_COLOR = Color(0, 0, 0)
@@ -157,30 +158,36 @@ def draw_circle_no_aa(screen: Surface, color: Color, position: Vector2, radius: 
     gfxdraw.filled_circle(screen, x, y, int_radius, color)
 
 
-def scale(position: Vector2, scale_factor: float) -> Vector2:
+def scale(
+    position: Vector2, scale_factor: float, xshift: float, yshift: float
+) -> Vector2:
     screen_center = Vector2(SCREEN_SIZE[0], SCREEN_SIZE[1]) / 2
-    position_from_center = position - screen_center
+    position_from_center = position + Vector2(xshift, yshift) - screen_center
     scaled_position = position_from_center * scale_factor
     new_position = scaled_position + screen_center
     return new_position
 
 
-def draw_bodies_aa(state: State, screen: Surface, scale_factor: float):
+def draw_bodies_aa(
+    state: State, screen: Surface, scale_factor: float, xshift: float, yshift: float
+):
     for color, position, size in zip(state.colors, state.positions, state.sizes):
         draw_circle_aa(
             screen,
             color,
-            scale(position, scale_factor),
+            scale(position, scale_factor, xshift, yshift),
             max(size * scale_factor, MIN_VISIBLE_SIZE),
         )
 
 
-def draw_bodies_no_aa(state: State, screen: Surface, scale_factor: float):
+def draw_bodies_no_aa(
+    state: State, screen: Surface, scale_factor: float, xshift: float, yshift: float
+):
     for color, position, size in zip(state.colors, state.positions, state.sizes):
         draw_circle_no_aa(
             screen,
             color,
-            scale(position, scale_factor),
+            scale(position, scale_factor, xshift, yshift),
             max(size * scale_factor, MIN_VISIBLE_SIZE),
         )
 
@@ -193,6 +200,8 @@ def run_simulation(number_of_stars: int):
     dt_in_s = 0
     paused = False
     scale_factor = 1
+    xshift = 0
+    yshift = 0
 
     state = State(number_of_stars)
 
@@ -223,12 +232,21 @@ def run_simulation(number_of_stars: int):
                 # The "z" key increases the scale
                 if event.key == pygame.K_z:
                     scale_factor /= 0.9
+                # The arrow keys move the view
+                if event.key == pygame.K_LEFT:
+                    xshift += SHIFT / scale_factor
+                if event.key == pygame.K_RIGHT:
+                    xshift -= SHIFT / scale_factor
+                if event.key == pygame.K_UP:
+                    yshift += SHIFT / scale_factor
+                if event.key == pygame.K_DOWN:
+                    yshift -= SHIFT / scale_factor
 
         if not paused:
             state.update(dt_in_s)
 
             screen.fill(BACKGROUND_COLOR)
-            draw_bodies(state, screen, scale_factor)
+            draw_bodies(state, screen, scale_factor, xshift, yshift)
             pygame.display.flip()
 
         dt_in_s = clock.tick(60) / 1000  # limits FPS to 60
