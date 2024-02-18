@@ -220,6 +220,9 @@ def run_simulation(number_of_stars: int):
                 if event.key == pygame.K_r:
                     state = State(number_of_stars)
                     paused = False
+                    scale_factor = 1
+                    xshift = 0
+                    yshift = 0
                 # the "P" key pauses the simulation
                 if event.key == pygame.K_p:
                     paused = not paused
