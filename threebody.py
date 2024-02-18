@@ -131,9 +131,20 @@ class State:
         self._update_acceleration()
 
 
+def is_star_out_of_screen(x: int, y: int, radius: int):
+    return (
+        x + radius < 0
+        or x - radius > SCREEN_SIZE[0]
+        or y + radius < 0
+        or y - radius > SCREEN_SIZE[1]
+    )
+
+
 def draw_circle_aa(screen: Surface, color: Color, position: Vector2, radius: float):
     x, y = round(position.x), round(position.y)
     int_radius = round(radius)
+    if is_star_out_of_screen(x, y, int_radius):
+        return
     gfxdraw.aacircle(screen, x, y, int_radius, color)
     gfxdraw.filled_circle(screen, x, y, int_radius, color)
 
@@ -141,6 +152,8 @@ def draw_circle_aa(screen: Surface, color: Color, position: Vector2, radius: flo
 def draw_circle_no_aa(screen: Surface, color: Color, position: Vector2, radius: float):
     x, y = round(position.x), round(position.y)
     int_radius = round(radius)
+    if is_star_out_of_screen(x, y, int_radius):
+        return
     gfxdraw.filled_circle(screen, x, y, int_radius, color)
 
 
