@@ -34,7 +34,7 @@ def random_mass(number_of_stars: int) -> float:
 
 def size_from_mass(mass: float) -> float:
     """Just linear here, for more representation"""
-    return max(mass / 50, MIN_VISIBLE_SIZE)
+    return mass / 50
 
 
 GravitationFactor = tuple[list[float], ...]
