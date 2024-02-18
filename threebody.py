@@ -177,6 +177,7 @@ def run_simulation(number_of_stars: int):
                 # the "R" key resets the simulation
                 if event.key == pygame.K_r:
                     state = State(number_of_stars)
+                    paused = False
                 # the "P" key pauses the simulation
                 if event.key == pygame.K_p:
                     paused = not paused
